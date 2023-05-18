@@ -2,9 +2,6 @@
 #
 # Copyright (C) 2007-2020 OpenWrt.org
 
-ifneq ($(__autotools_inc),1)
-__autotools_inc=1
-
 autoconf_bool = $(patsubst %,$(if $($(1)),--enable,--disable)-%,$(2))
 
 # delete *.la-files from staging_dir - we can not yet remove respective lines within all package
@@ -23,10 +20,7 @@ AM_TOOL_PATHS:= \
 	LIBTOOLIZE=$(STAGING_DIR_HOST)/bin/libtoolize \
 	LIBTOOL=$(STAGING_DIR_HOST)/bin/libtool \
 	M4=$(STAGING_DIR_HOST)/bin/m4 \
-	AUTOPOINT=true \
-	GTKDOCIZE=true
-
-AM_TOOL_PATHS_FAKE:=$(subst = ,=,$(patsubst "%,"$(TRUE)",$(subst =,= ",$(AM_TOOL_PATHS))))
+	AUTOPOINT=true
 
 # 1: build dir
 # 2: remove files
@@ -38,7 +32,7 @@ define autoreconf
 		$(patsubst %,rm -f %;,$(2)) \
 		$(foreach p,$(3), \
 			if [ -f $(p)/configure.ac ] || [ -f $(p)/configure.in ]; then \
-				[ -d $(p)/autom4te.cache ] && rm -rf $(p)/autom4te.cache; \
+				[ -d $(p)/autom4te.cache ] && rm -rf autom4te.cache; \
 				[ -e $(p)/config.rpath ] || \
 						ln -s $(SCRIPT_DIR)/config.rpath $(p)/config.rpath; \
 				touch NEWS AUTHORS COPYING ABOUT-NLS ChangeLog; \
@@ -96,7 +90,7 @@ endef
 
 define gettext_version_target
 	(cd $(PKG_BUILD_DIR) && \
-		GETTEXT_VERSION=$(shell $(STAGING_DIR_HOSTPKG)/bin/gettext -V | $(STAGING_DIR_HOST)/bin/sed -rne '1s/.*\b([0-9]\.[0-9]+(\.[0-9]+)?)\b.*/\1/p' ) && \
+		GETTEXT_VERSION=$(shell $(STAGING_DIR_HOSTPKG)/bin/gettext -V | $(STAGING_DIR_HOST)/bin/sed -ne '1s/.*\([0-9]\.[0-9]\{2\}\.[0-9]\).*/\1/p' ) && \
 		$(STAGING_DIR_HOST)/bin/sed \
 			-i $(PKG_BUILD_DIR)/configure.ac \
 			-e "s/AM_GNU_GETTEXT_VERSION(.*)/AM_GNU_GETTEXT_VERSION(\[$$$$GETTEXT_VERSION\])/g" && \
@@ -116,7 +110,7 @@ ifneq ($(filter patch-libtool,$(PKG_FIXUP)),)
 endif
 
 ifneq ($(filter libtool,$(PKG_FIXUP)),)
-  PKG_BUILD_DEPENDS += libtool
+  PKG_BUILD_DEPENDS += libtool gettext libiconv
  ifeq ($(filter no-autoreconf,$(PKG_FIXUP)),)
   Hooks/Configure/Pre += autoreconf_target
  endif
@@ -124,6 +118,13 @@ endif
 
 ifneq ($(filter libtool-abiver,$(PKG_FIXUP)),)
   Hooks/Configure/Post += set_libtool_abiver
+endif
+
+ifneq ($(filter libtool-ucxx,$(PKG_FIXUP)),)
+  PKG_BUILD_DEPENDS += libtool gettext libiconv
+ ifeq ($(filter no-autoreconf,$(PKG_FIXUP)),)
+  Hooks/Configure/Pre += autoreconf_target
+ endif
 endif
 
 ifneq ($(filter autoreconf,$(PKG_FIXUP)),)
@@ -151,11 +152,21 @@ define patch_libtool_host
     $(HOST_BUILD_DIR)))
 endef
 
-ifneq ($(filter patch-libtool,$(HOST_FIXUP)),)
+ifneq ($(filter patch-libtool,$(PKG_FIXUP)),)
   Hooks/HostConfigure/Pre += patch_libtool_host
 endif
 
+ifneq ($(filter patch-libtool,$(HOST_FIXUP)),)
+  Hooks/HostConfigure/Pre += $(strip $(call patch_libtool,$(HOST_BUILD_DIR)))
+endif
+
 ifneq ($(filter libtool,$(HOST_FIXUP)),)
+ ifeq ($(filter no-autoreconf,$(HOST_FIXUP)),)
+  Hooks/HostConfigure/Pre += autoreconf_host
+ endif
+endif
+
+ifneq ($(filter libtool-ucxx,$(HOST_FIXUP)),)
  ifeq ($(filter no-autoreconf,$(HOST_FIXUP)),)
   Hooks/HostConfigure/Pre += autoreconf_host
  endif
@@ -166,5 +177,3 @@ ifneq ($(filter autoreconf,$(HOST_FIXUP)),)
     Hooks/HostConfigure/Pre += autoreconf_host
   endif
 endif
-
-endif #__autotools_inc

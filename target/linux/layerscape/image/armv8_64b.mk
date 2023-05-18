@@ -8,7 +8,8 @@ define Device/Default
   FILESYSTEMS := squashfs
   KERNEL := kernel-bin | gzip | uImage gzip
   KERNEL_INITRAMFS = kernel-bin | gzip | fit gzip $$(DTS_DIR)/$$(DEVICE_DTS).dtb
-  KERNEL_LOADADDR := 0x80000000
+  KERNEL_LOADADDR := 0x80080000
+  KERNEL_ENTRY_POINT := 0x80080000
   DEVICE_DTS = freescale/$(subst _,-,$(1))
   IMAGE_SIZE := 64m
   IMAGE/sysupgrade.bin = \
@@ -29,7 +30,7 @@ define Device/fsl_ls1012a-frdm
   DEVICE_MODEL := FRDM-LS1012A
   DEVICE_PACKAGES += \
     layerscape-ppfe \
-    trusted-firmware-a-ls1012a-frdm \
+    tfa-ls1012a-frdm \
     kmod-ppfe
   BLOCKSIZE := 256KiB
   IMAGE/firmware.bin := \
@@ -46,6 +47,7 @@ define Device/fsl_ls1012a-frdm
     append-rootfs | pad-rootfs | \
     check-size $(LS_SYSUPGRADE_IMAGE_SIZE) | append-metadata
   KERNEL := kernel-bin | gzip | fit gzip $$(DTS_DIR)/$$(DEVICE_DTS).dtb
+  KERNEL_INITRAMFS := kernel-bin | fit none $$(DTS_DIR)/$$(DEVICE_DTS).dtb
 endef
 TARGET_DEVICES += fsl_ls1012a-frdm
 
@@ -55,7 +57,7 @@ define Device/fsl_ls1012a-rdb
   DEVICE_MODEL := LS1012A-RDB
   DEVICE_PACKAGES += \
     layerscape-ppfe \
-    trusted-firmware-a-ls1012a-rdb \
+    tfa-ls1012a-rdb \
     kmod-hwmon-ina2xx \
     kmod-iio-fxas21002c-i2c \
     kmod-iio-fxos8700-i2c \
@@ -79,7 +81,7 @@ define Device/fsl_ls1012a-frwy-sdboot
   DEVICE_MODEL := FRWY-LS1012A
   DEVICE_PACKAGES += \
     layerscape-ppfe \
-    trusted-firmware-a-ls1012a-frwy-sdboot \
+    tfa-ls1012a-frwy-sdboot \
     kmod-ppfe
   DEVICE_DTS := freescale/fsl-ls1012a-frwy
   IMAGES += firmware.bin
@@ -98,53 +100,6 @@ define Device/fsl_ls1012a-frwy-sdboot
 endef
 TARGET_DEVICES += fsl_ls1012a-frwy-sdboot
 
-define Device/fsl_ls1028a-rdb
-  DEVICE_VENDOR := NXP
-  DEVICE_MODEL := LS1028A-RDB
-  DEVICE_VARIANT := Default
-  DEVICE_DTS := freescale/fsl-ls1028a-rdb
-  KERNEL = kernel-bin | gzip | fit gzip $$(DTS_DIR)/$$(DEVICE_DTS).dtb
-  DEVICE_PACKAGES += \
-    trusted-firmware-a-ls1028a-rdb \
-    kmod-hwmon-ina2xx \
-    kmod-hwmon-lm90 \
-    kmod-rtc-pcf2127
-  IMAGE/firmware.bin := \
-    ls-clean | \
-    ls-append $(1)-bl2.pbl | pad-to 1M | \
-    ls-append $(1)-fip.bin | pad-to 5M | \
-    ls-append $(1)-uboot-env.bin | pad-to 16M | \
-    append-kernel | \
-    append-rootfs | pad-rootfs | check-size
-  IMAGE/sysupgrade.bin := \
-    append-kernel | \
-    append-rootfs | pad-rootfs | \
-    check-size $(LS_SYSUPGRADE_IMAGE_SIZE) | append-metadata
-endef
-TARGET_DEVICES += fsl_ls1028a-rdb
-
-define Device/fsl_ls1028a-rdb-sdboot
-  $(Device/fsl-sdboot)
-  DEVICE_VENDOR := NXP
-  DEVICE_MODEL := LS1028A-RDB
-  DEVICE_VARIANT := SD Card Boot
-  DEVICE_DTS := freescale/fsl-ls1028a-rdb
-  DEVICE_PACKAGES += \
-    trusted-firmware-a-ls1028a-rdb-sdboot \
-    kmod-hwmon-ina2xx \
-    kmod-hwmon-lm90 \
-    kmod-rtc-pcf2127
-  IMAGE/sdcard.img.gz := \
-    ls-clean | \
-    ls-append-sdhead $(1) | pad-to 4K | \
-    ls-append $(1)-bl2.pbl | pad-to 1M | \
-    ls-append $(1)-fip.bin | pad-to 5M | \
-    ls-append $(1)-uboot-env.bin | pad-to 16M | \
-    ls-append-kernel | pad-to $(LS_SD_ROOTFSPART_OFFSET)M | \
-    append-rootfs | pad-to $(LS_SD_IMAGE_SIZE)M | gzip
-endef
-TARGET_DEVICES += fsl_ls1028a-rdb-sdboot
-
 define Device/fsl_ls1043a-rdb
   $(Device/fix-sysupgrade)
   DEVICE_VENDOR := NXP
@@ -152,12 +107,12 @@ define Device/fsl_ls1043a-rdb
   DEVICE_VARIANT := Default
   DEVICE_PACKAGES += \
     layerscape-fman \
-    trusted-firmware-a-ls1043a-rdb \
+    tfa-ls1043a-rdb \
     fmc fmc-eth-config \
     kmod-ahci-qoriq \
     kmod-hwmon-ina2xx \
     kmod-hwmon-lm90
-  DEVICE_DTS := freescale/fsl-ls1043a-rdb
+  DEVICE_DTS := freescale/fsl-ls1043a-rdb-sdk
   IMAGE/firmware.bin := \
     ls-clean | \
     ls-append $(1)-bl2.pbl | pad-to 1M | \
@@ -178,12 +133,12 @@ define Device/fsl_ls1043a-rdb-sdboot
   DEVICE_VARIANT := SD Card Boot
   DEVICE_PACKAGES += \
     layerscape-fman \
-    trusted-firmware-a-ls1043a-rdb-sdboot \
+    tfa-ls1043a-rdb-sdboot \
     fmc fmc-eth-config \
     kmod-ahci-qoriq \
     kmod-hwmon-ina2xx \
     kmod-hwmon-lm90
-  DEVICE_DTS := freescale/fsl-ls1043a-rdb
+  DEVICE_DTS := freescale/fsl-ls1043a-rdb-sdk
   IMAGE/sdcard.img.gz := \
     ls-clean | \
     ls-append-sdhead $(1) | pad-to 4K | \
@@ -202,8 +157,8 @@ define Device/fsl_ls1046a-frwy
   DEVICE_VARIANT := Default
   DEVICE_PACKAGES += \
     layerscape-fman \
-    trusted-firmware-a-ls1046a-frwy
-  DEVICE_DTS := freescale/fsl-ls1046a-frwy
+    tfa-ls1046a-frwy
+  DEVICE_DTS := freescale/fsl-ls1046a-frwy-sdk
   IMAGE/firmware.bin := \
     ls-clean | \
     ls-append $(1)-bl2.pbl | pad-to 1M | \
@@ -223,8 +178,8 @@ define Device/fsl_ls1046a-frwy-sdboot
   DEVICE_VARIANT := SD Card Boot
   DEVICE_PACKAGES += \
     layerscape-fman \
-    trusted-firmware-a-ls1046a-frwy-sdboot
-  DEVICE_DTS := freescale/fsl-ls1046a-frwy
+    tfa-ls1046a-frwy-sdboot
+  DEVICE_DTS := freescale/fsl-ls1046a-frwy-sdk
   IMAGE/sdcard.img.gz := \
     ls-clean | \
     ls-append-sdhead $(1) | pad-to 4K | \
@@ -244,12 +199,12 @@ define Device/fsl_ls1046a-rdb
   DEVICE_VARIANT := Default
   DEVICE_PACKAGES += \
     layerscape-fman \
-    trusted-firmware-a-ls1046a-rdb \
+    tfa-ls1046a-rdb \
     fmc fmc-eth-config \
     kmod-ahci-qoriq \
     kmod-hwmon-ina2xx \
     kmod-hwmon-lm90
-  DEVICE_DTS := freescale/fsl-ls1046a-rdb
+  DEVICE_DTS := freescale/fsl-ls1046a-rdb-sdk
   IMAGE/firmware.bin := \
     ls-clean | \
     ls-append $(1)-bl2.pbl | pad-to 1M | \
@@ -270,12 +225,12 @@ define Device/fsl_ls1046a-rdb-sdboot
   DEVICE_VARIANT := SD Card Boot
   DEVICE_PACKAGES += \
     layerscape-fman \
-    trusted-firmware-a-ls1046a-rdb-sdboot \
+    tfa-ls1046a-rdb-sdboot \
     fmc fmc-eth-config \
     kmod-ahci-qoriq \
     kmod-hwmon-ina2xx \
     kmod-hwmon-lm90
-  DEVICE_DTS := freescale/fsl-ls1046a-rdb
+  DEVICE_DTS := freescale/fsl-ls1046a-rdb-sdk
   IMAGE/sdcard.img.gz := \
     ls-clean | \
     ls-append-sdhead $(1) | pad-to 4K | \
@@ -296,7 +251,7 @@ define Device/fsl_ls1088a-rdb
   DEVICE_PACKAGES += \
     layerscape-mc \
     layerscape-dpl \
-    trusted-firmware-a-ls1088a-rdb \
+    tfa-ls1088a-rdb \
     restool \
     kmod-ahci-qoriq \
     kmod-hwmon-ina2xx \
@@ -324,7 +279,7 @@ define Device/fsl_ls1088a-rdb-sdboot
   DEVICE_PACKAGES += \
     layerscape-mc \
     layerscape-dpl \
-    trusted-firmware-a-ls1088a-rdb-sdboot \
+    tfa-ls1088a-rdb-sdboot \
     restool \
     kmod-ahci-qoriq \
     kmod-hwmon-ina2xx \
@@ -351,7 +306,7 @@ define Device/fsl_ls2088a-rdb
   DEVICE_PACKAGES += \
     layerscape-mc \
     layerscape-dpl \
-    trusted-firmware-a-ls2088a-rdb \
+    tfa-ls2088a-rdb \
     restool \
     kmod-ahci-qoriq
   IMAGE/firmware.bin := \
@@ -376,7 +331,7 @@ define Device/fsl_lx2160a-rdb
     layerscape-mc \
     layerscape-dpl \
     layerscape-ddr-phy \
-    trusted-firmware-a-lx2160a-rdb \
+    tfa-lx2160a-rdb \
     restool
   IMAGE/firmware.bin := \
     ls-clean | \
@@ -402,7 +357,7 @@ define Device/fsl_lx2160a-rdb-sdboot
     layerscape-mc \
     layerscape-dpl \
     layerscape-ddr-phy \
-    trusted-firmware-a-lx2160a-rdb-sdboot \
+    tfa-lx2160a-rdb-sdboot \
     restool
   DEVICE_DTS := freescale/fsl-lx2160a-rdb
   IMAGE/sdcard.img.gz := \
@@ -442,8 +397,8 @@ define Device/traverse_ls1043
   DEVICE_DTS = freescale/traverse-ls1043s
   DEVICE_DTS_DIR = $(LINUX_DIR)/arch/arm64/boot/dts
   DEVICE_DTS_CONFIG = ls1043s
-  KERNEL := kernel-bin | gzip | traverse-fit gzip $$(DTS_DIR)/$$(DEVICE_DTS).dtb
-  KERNEL_INITRAMFS := kernel-bin | gzip | fit gzip $$(DTS_DIR)/$$(DEVICE_DTS).dtb
+  KERNEL := kernel-bin | gzip | traverse-fit gzip $$(DTS_DIR)/$$(DEVICE_DTS).dtb $$(FDT_LOADADDR)
+  KERNEL_INITRAMFS := kernel-bin | gzip | fit gzip $$(DTS_DIR)/$$(DEVICE_DTS).dtb $$(FDT_LOADADDR)
   IMAGES = root sysupgrade.bin
   IMAGE/root = append-rootfs
   IMAGE/sysupgrade.bin = sysupgrade-tar | append-metadata

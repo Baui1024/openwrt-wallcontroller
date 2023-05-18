@@ -27,13 +27,14 @@ endef
 
 $(eval $(call KernelPackage,btmtkuart))
 
-define KernelPackage/iio-mt6577-auxadc
-  TITLE:=Mediatek AUXADC driver
-  DEPENDS:=@(TARGET_mediatek_mt7622||TARGET_mediatek_filogic)
-  KCONFIG:=CONFIG_MEDIATEK_MT6577_AUXADC
+define KernelPackage/sdhci-mtk
+  SUBMENU:=Other modules
+  TITLE:=Mediatek SDHCI driver
+  DEPENDS:=@TARGET_mediatek_mt7622 +kmod-sdhci
+  KCONFIG:=CONFIG_MMC_MTK 
   FILES:= \
-	$(LINUX_DIR)/drivers/iio/adc/mt6577_auxadc.ko
-  AUTOLOAD:=$(call AutoProbe,mt6577_auxadc)
-  $(call AddDepends/iio)
+	$(LINUX_DIR)/drivers/mmc/host/mtk-sd.ko
+  AUTOLOAD:=$(call AutoProbe,mtk-sd,1)
 endef
-$(eval $(call KernelPackage,iio-mt6577-auxadc))
+
+$(eval $(call KernelPackage,sdhci-mtk))

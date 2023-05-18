@@ -10,7 +10,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=drv_tapi
 PKG_VERSION:=3.13.0
-PKG_RELEASE:=5
+PKG_RELEASE:=4
 
 PKG_SOURCE:=drv_tapi-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=@OPENWRT
@@ -19,7 +19,6 @@ PKG_MAINTAINER:=John Crispin <john@phrozen.org>
 
 PKG_CHECK_FORMAT_SECURITY:=0
 PKG_FIXUP:=autoreconf
-PKG_EXTMOD_SUBDIRS:=src
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -39,9 +38,6 @@ endef
 define KernelPackage/ltq-tapi/config
 	source "$(SOURCE)/Config.in"
 endef
-
-MAKE_FLAGS += \
-	$(KERNEL_MAKE_FLAGS)
 
 CONFIGURE_ARGS += \
 	ARCH=$(LINUX_KARCH) \

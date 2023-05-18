@@ -129,7 +129,8 @@ static char *g_net_dev_name[1] = {"dsl0"};
 
 static int g_ptm_prio_queue_map[8];
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,9,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,9,0) && \
+    !(LINUX_VERSION_CODE < KERNEL_VERSION(5,5,0) && LINUX_VERSION_CODE > KERNEL_VERSION(5,4,235))
 static DECLARE_TASKLET(g_swap_desc_tasklet, do_swap_desc_tasklet, 0);
 #else
 static DECLARE_TASKLET_OLD(g_swap_desc_tasklet, do_swap_desc_tasklet);
@@ -557,6 +558,7 @@ static inline int get_tx_desc(unsigned int itf, unsigned int *f_full)
 static irqreturn_t mailbox_irq_handler(int irq, void *dev_id)
 {
     unsigned int isr;
+    int i;
 
     isr = IFX_REG_R32(MBOX_IGU1_ISR);
     IFX_REG_W32(isr, MBOX_IGU1_ISRC);
