@@ -1,0 +1,21 @@
+Source-Makefile: feeds/mystuff/wallcontrollerutils/Makefile
+
+Package: python3-wallcontrollerutils
+Submenu: Python
+Version: 0.0.2-1
+Depends: +libc +USE_GLIBC:librt +USE_GLIBC:libpthread +python3
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: lang
+Category: Languages
+Repository: base
+Title: Python3 module for fast conversion
+Maintainer: 
+Source: python-wallcontrollerutils-0.0.2-1.tar.gz
+Type: ipkg
+Description: Python3 module module that converts RGB888 to RGB565
+
+@@
+
+
