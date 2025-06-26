@@ -1,0 +1,105 @@
+&i2c {
+    pca9635@8 {
+        compatible = "nxp,pca9635";
+        reg = <0x08>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+        status = "okay";
+
+        led@0 {
+            label = "led0";
+            reg = <0>;
+            default-state = "off";
+        };
+
+        led@1 {
+            label = "led1";
+            reg = <1>;
+            default-state = "off";
+        };
+
+        led@2 {
+            label = "led2";
+            reg = <2>;
+            default-state = "off";
+        };
+
+        led@3 {
+            label = "led3";
+            reg = <3>;
+            default-state = "off";
+        };
+
+        led@4 {
+            label = "led4";
+            reg = <4>;
+            default-state = "off";
+        };
+
+        led@5 {
+            label = "led5";
+            reg = <5>;
+            default-state = "off";
+        };
+
+        led@6 {
+            label = "led6";
+            reg = <6>;
+            default-state = "off";
+        };
+
+        led@7 {
+            label = "led7";
+            reg = <7>;
+            default-state = "off";
+        };
+
+        led@8 {
+            label = "led8";
+            reg = <8>;
+            default-state = "off";
+        };
+
+        led@9 {
+            label = "led9";
+            reg = <9>;
+            default-state = "off";
+        };
+
+        led@10 {
+            label = "led10";
+            reg = <10>;
+            default-state = "off";
+        };
+
+        led@11 {
+            label = "led11";
+            reg = <11>;
+            default-state = "off";
+        };
+
+        led@12 {
+            label = "led12";
+            reg = <12>;
+            default-state = "off";
+        };
+
+        led@13 {
+            label = "led13";
+            reg = <13>;
+            default-state = "off";
+        };
+
+        led@14 {
+            label = "led14";
+            reg = <14>;
+            default-state = "off";
+        };
+
+        led@15 {
+            label = "led15";
+            reg = <15>;
+            default-state = "off";
+        };
+    };
+};
