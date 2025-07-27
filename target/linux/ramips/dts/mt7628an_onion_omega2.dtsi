@@ -156,25 +156,6 @@
 &i2c {
 	status = "okay";
 
-	//CUSTOM for the PCA9635 LED driver
-	// pca9635@8 {
-    //     compatible = "nxp,pca9635";
-    //     reg = <0x8>;
-    //     #address-cells = <1>;
-    //     #size-cells = <0>;
-
-    //     led@0 {
-    //         label = "user:led0";
-    //         reg = <0>;
-    //     };
-
-    //     led@1 {
-    //         label = "user:led1";
-    //         reg = <1>;
-    //     };
-
-        // Repeat up to led15 as needed
-    // };
 };
 
 &uart1 {
@@ -192,25 +173,10 @@
 
 &pinctrl {
 	ephy-digital;
-
-	sdxc_iot_mode: sdxc_iot_mode {
-		esd {
-			groups = "esd";
-			function = "iot";
-		};
-
-		sdxc {
-			groups = "sdmode";
-			function = "sdxc";
-		};
-	};
 };
 
 &sdhci {
-	status = "okay";
-
-	pinctrl-0 = <&sdxc_iot_mode>;
-	pinctrl-1 = <&sdxc_iot_mode>;
+	status = "disabled";
 };
 
 &wmac {
