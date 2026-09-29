@@ -281,7 +281,7 @@ endef
 TARGET_DEVICES += hilink_hlk-7628n
 
 define Device/hilink_hlk-7688a
-  IMAGE_SIZE := 32448k
+  IMAGE_SIZE := 20480k
   DEVICE_VENDOR := Hi-Link
   DEVICE_MODEL := HLK-7688A
   DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport

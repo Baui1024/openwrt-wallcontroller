@@ -29,6 +29,14 @@
 			gpios = <&gpio 38 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_RESTART>;
 		};
+
+		/* Hold 5-10s: fall back to static 192.168.100.100,
+		 * handled by /etc/rc.button/BTN_0 */
+		ip-reset {
+			label = "ip-reset";
+			gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
+			linux,code = <BTN_0>;
+		};
 	};
 
 	leds {
@@ -163,7 +171,14 @@
 			partition@50000 {
 				compatible = "denx,uimage";
 				label = "firmware";
-				reg = <0x50000 0x1fb0000>;
+				reg = <0x50000 0x1400000>;
+			};
+
+			/* Kept out of "firmware" so the jffs2 overlay stays small
+			 * (jffs2 scans the whole partition on every mount). */
+			partition@1450000 {
+				label = "data";
+				reg = <0x1450000 0xbb0000>;
 			};
 		};
 	};
